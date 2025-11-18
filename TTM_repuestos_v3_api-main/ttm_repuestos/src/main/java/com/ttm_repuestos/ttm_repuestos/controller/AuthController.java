@@ -1,7 +1,10 @@
 package com.ttm_repuestos.ttm_repuestos.controller;
 
+import com.ttm_repuestos.ttm_repuestos.model.Usuario;
 import com.ttm_repuestos.ttm_repuestos.security.JwtService;
 import com.ttm_repuestos.ttm_repuestos.service.UsuarioService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,26 +27,21 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public Map<String, String> register(@RequestBody Map<String, String> body) {
-        String correo = body.get("correo");
-        String contrasena = body.get("contrasena");
-        if (correo == null || contrasena == null || correo.isBlank() ||
-                contrasena.isBlank()) {
-            throw new IllegalArgumentException("Correo y contraseña son requeridos");
-        }
-        // Nota: Esto probablemente fallará si no proporcionas todos los campos no nulos del Usuario.
-        usuarioService.register(correo, contrasena);
-        return Map.of("message", "Usuario registrado correctamente");
+    public ResponseEntity<Usuario> register(@RequestBody Usuario usuario) {
+        System.out.println(usuario);
+        Usuario nuevoUsuario = usuarioService.createUsuario(usuario);
+        nuevoUsuario.setPassword(null);
+        return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
     public Map<String, String> login(@RequestBody Map<String, String> body) {
-        String correo = body.get("correo");
-        String contrasena = body.get("contrasena");
+        String email = body.get("email");
+        String password = body.get("password");
         Authentication auth = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(correo, contrasena));
+                new UsernamePasswordAuthenticationToken(email, password));
         if (auth.isAuthenticated()) {
-            String token = jwtService.generateToken(correo);
+            String token = jwtService.generateToken(email);
             return Map.of("token", token);
         }
         throw new RuntimeException("Credenciales inválidas");

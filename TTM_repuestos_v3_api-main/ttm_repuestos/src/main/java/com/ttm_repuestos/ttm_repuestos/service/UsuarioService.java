@@ -1,7 +1,5 @@
 package com.ttm_repuestos.ttm_repuestos.service;
 
-
-
 import com.ttm_repuestos.ttm_repuestos.model.Usuario;
 import com.ttm_repuestos.ttm_repuestos.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -19,31 +17,39 @@ public class UsuarioService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    public Usuario register(String correo, String contrasena) {
-        Usuario usuario = Usuario.builder()
-                .correo(correo)
-                .contrasena(passwordEncoder.encode(contrasena))
-                .build();
+
+    public Usuario createUsuario(Usuario usuario) {
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
     }
-    public Optional<Usuario> findByCorreo(String correo) {
-        return usuarioRepository.findByCorreo(correo);
+
+    public Optional<Usuario> findByEmail(String email) {
+        return usuarioRepository.findByEmail(email);
     }
 
     public List<Usuario> getAllUsuarios() {
         return usuarioRepository.findAll();
     }
 
-    public Usuario getUsuarioById(Long id) {
-        return usuarioRepository.findById(id).orElse(null);
-
+    public Optional<Usuario> getUsuarioById(Long id) {
+        return usuarioRepository.findById(id);
     }
 
-    public Usuario updateUsuario(Usuario usuario) {
-        return usuarioRepository.save(usuario);
-    }
+    public Usuario updateUsuario(Long id, Usuario usuarioDetails) {
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario not found"));
 
-    public Usuario createUsuario(Usuario usuario) {
+        usuario.setNombre(usuarioDetails.getNombre());
+        usuario.setApellido(usuarioDetails.getApellido());
+        usuario.setEmail(usuarioDetails.getEmail());
+        usuario.setTelefono(usuarioDetails.getTelefono());
+        usuario.setEdad(usuarioDetails.getEdad());
+        usuario.setEmpresa(usuarioDetails.getEmpresa());
+        usuario.setRecibeNewsletter(usuarioDetails.isRecibeNewsletter());
+
+        if (usuarioDetails.getPassword() != null && !usuarioDetails.getPassword().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(usuarioDetails.getPassword()));
+        }
+
         return usuarioRepository.save(usuario);
     }
 
