@@ -34,7 +34,4 @@ public class DescuentoCodigo {
     @Column(name="categoriasPermitidas", length = 2000)
     private String permisosJson;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "empresa_id",nullable = false)
-    private Empresa empresa;
 }

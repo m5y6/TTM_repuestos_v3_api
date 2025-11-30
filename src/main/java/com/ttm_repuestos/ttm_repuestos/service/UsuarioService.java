@@ -1,5 +1,6 @@
 package com.ttm_repuestos.ttm_repuestos.service;
 
+import com.ttm_repuestos.ttm_repuestos.model.Carrito;
 import com.ttm_repuestos.ttm_repuestos.model.Usuario;
 import com.ttm_repuestos.ttm_repuestos.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -19,7 +20,17 @@ public class UsuarioService {
     private PasswordEncoder passwordEncoder;
 
     public Usuario createUsuario(Usuario usuario) {
+        // 1. Hashear la contraseña
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+
+        // 2. Crear un nuevo carrito
+        Carrito nuevoCarrito = new Carrito();
+
+        // 3. Establecer la relación bidireccional
+        nuevoCarrito.setUsuario(usuario);
+        usuario.setCarrito(nuevoCarrito);
+
+        // 4. Guardar el usuario (el carrito se guardará en cascada)
         return usuarioRepository.save(usuario);
     }
 
@@ -43,8 +54,7 @@ public class UsuarioService {
         usuario.setEmail(usuarioDetails.getEmail());
         usuario.setTelefono(usuarioDetails.getTelefono());
         usuario.setEdad(usuarioDetails.getEdad());
-        usuario.setEmpresa(usuarioDetails.getEmpresa());
-        usuario.setRecibeNewsletter(usuarioDetails.isRecibeNewsletter());
+
 
         if (usuarioDetails.getPassword() != null && !usuarioDetails.getPassword().isEmpty()) {
             usuario.setPassword(passwordEncoder.encode(usuarioDetails.getPassword()));

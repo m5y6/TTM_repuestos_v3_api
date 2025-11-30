@@ -1,11 +1,6 @@
 package com.ttm_repuestos.ttm_repuestos.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,10 +36,7 @@ public class Usuario {
     @Column(nullable = false)
     private Integer edad;
 
-    @Column(nullable = true) // Opcional
-    private String empresa;
-
-    @Column(name = "recibe_newsletter", nullable = false)
-    private boolean recibeNewsletter;
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Carrito carrito;
 
 }
