@@ -1,5 +1,7 @@
 package com.ttm_repuestos.ttm_repuestos.service;
 
+import com.ttm_repuestos.ttm_repuestos.dto.RegisterRequestDto;
+import com.ttm_repuestos.ttm_repuestos.dto.UpdateUsuarioDto;
 import com.ttm_repuestos.ttm_repuestos.model.Carrito;
 import com.ttm_repuestos.ttm_repuestos.model.Usuario;
 import com.ttm_repuestos.ttm_repuestos.repository.UsuarioRepository;
@@ -19,18 +21,20 @@ public class UsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public Usuario createUsuario(Usuario usuario) {
-        // 1. Hashear la contraseña
-        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+    public Usuario createUsuario(RegisterRequestDto requestDto) {
+        Usuario usuario = new Usuario();
+        usuario.setNombre(requestDto.getNombre());
+        usuario.setApellido(requestDto.getApellido());
+        usuario.setEmail(requestDto.getEmail());
+        usuario.setTelefono(requestDto.getTelefono());
+        usuario.setEdad(requestDto.getEdad());
+        usuario.setPassword(passwordEncoder.encode(requestDto.getPassword()));
+        usuario.setRol(0);
 
-        // 2. Crear un nuevo carrito
         Carrito nuevoCarrito = new Carrito();
-
-        // 3. Establecer la relación bidireccional
         nuevoCarrito.setUsuario(usuario);
         usuario.setCarrito(nuevoCarrito);
 
-        // 4. Guardar el usuario (el carrito se guardará en cascada)
         return usuarioRepository.save(usuario);
     }
 
@@ -46,19 +50,15 @@ public class UsuarioService {
         return usuarioRepository.findById(id);
     }
 
-    public Usuario updateUsuario(Long id, Usuario usuarioDetails) {
-        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario not found"));
+    public Usuario updateUsuario(Long id, UpdateUsuarioDto usuarioDetails) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
 
         usuario.setNombre(usuarioDetails.getNombre());
         usuario.setApellido(usuarioDetails.getApellido());
         usuario.setEmail(usuarioDetails.getEmail());
         usuario.setTelefono(usuarioDetails.getTelefono());
         usuario.setEdad(usuarioDetails.getEdad());
-
-
-        if (usuarioDetails.getPassword() != null && !usuarioDetails.getPassword().isEmpty()) {
-            usuario.setPassword(passwordEncoder.encode(usuarioDetails.getPassword()));
-        }
 
         return usuarioRepository.save(usuario);
     }

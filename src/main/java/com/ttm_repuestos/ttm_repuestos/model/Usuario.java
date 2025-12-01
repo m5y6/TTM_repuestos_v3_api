@@ -36,6 +36,9 @@ public class Usuario {
     @Column(nullable = false)
     private Integer edad;
 
+    @Column(nullable = false)
+    private Integer rol;
+
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Carrito carrito;
 
