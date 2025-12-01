@@ -1,5 +1,6 @@
 package com.ttm_repuestos.ttm_repuestos.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,6 +36,7 @@ public class Producto {
     @Column(nullable = false)
     private String categoria;
     
+    @JsonProperty("imagen_url")
     @Column(name = "imagen_url")
     private String imagenUrl;
 
