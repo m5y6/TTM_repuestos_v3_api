@@ -22,8 +22,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.time.LocalDateTime;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -35,29 +33,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(withDefaults())
-                .csrf(AbstractHttpConfigurer::disable) // Método actualizado para deshabilitar CSRF
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> {}) // Habilitar CORS con configuración por defecto
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Configuración de autorización
-                .authorizeHttpRequests(auth -> auth
-                        // Rutas públicas que no requieren autenticación
-                        .requestMatchers(
-                                new AntPathRequestMatcher("/api/auth/**"),
-                                new AntPathRequestMatcher("/h2-console/**"),
-                                new AntPathRequestMatcher("/v3/api-docs/**"),
-                                new AntPathRequestMatcher("/swagger-ui/**"),
-                                new AntPathRequestMatcher("/swagger-ui.html"),
-                                new AntPathRequestMatcher("/images/**")
-                        ).permitAll()
-                        // Todas las demás peticiones requieren autenticación
-                        .anyRequest().authenticated()
-                )
-
-                // Añadir el filtro JWT antes del filtro de autenticación estándar
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
-                // Configuración de manejo de excepciones de seguridad
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -71,9 +49,25 @@ public class SecurityConfig {
                             ErrorResponse errorResponse = new ErrorResponse(HttpStatus.FORBIDDEN.value(), "No tienes permiso para acceder a este recurso.", LocalDateTime.now());
                             response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
                         })
-                );
+                )
+                .authorizeHttpRequests(auth -> auth
+                        // Definir explícitamente TODAS las rutas públicas
+                        .requestMatchers(
+                                new AntPathRequestMatcher("/api/auth/**"),
+                                new AntPathRequestMatcher("/v3/api-docs/**"),
+                                new AntPathRequestMatcher("/swagger-ui/**"),
+                                new AntPathRequestMatcher("/swagger-ui.html"),
+                                new AntPathRequestMatcher("/images/**"),
+                                new AntPathRequestMatcher("/h2-console/**"),
+                                new AntPathRequestMatcher("/api/productos", HttpMethod.GET.name()),
+                                new AntPathRequestMatcher("/api/productos/**", HttpMethod.GET.name())
+                        ).permitAll()
+                        // Todas las demás peticiones deben ser autenticadas
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Headers para H2-Console
+        // Configuración para H2 Console
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         return http.build();

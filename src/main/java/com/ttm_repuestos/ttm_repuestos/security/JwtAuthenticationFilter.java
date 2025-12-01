@@ -1,5 +1,7 @@
 package com.ttm_repuestos.ttm_repuestos.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,26 +32,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail; // 'userEmail' o 'correo'
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt); // Extraemos el email (que es el username en nuestro caso)
+        final String jwt = authHeader.substring(7);
+        String userEmail = null;
 
-        // Si tenemos el email y el usuario no está autenticado todavía
+        try {
+            userEmail = jwtService.extractUsername(jwt);
+        } catch (ExpiredJwtException e) {
+            // Si el token ha expirado, simplemente continuamos la cadena de filtros.
+            // La petición será tratada como "no autenticada".
+            // Opcional: podrías loguear esto si quieres.
+            // log.warn("JWT Token has expired: {}", e.getMessage());
+        } catch (JwtException e) {
+            // Lo mismo para cualquier otro error de JWT (token malformado, etc.)
+            // log.warn("JWT Token error: {}", e.getMessage());
+        }
+
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-            // Si el token es válido, creamos un token de autenticación y lo guardamos en el contexto
+            // Validamos el token (esta validación también podría fallar si el token expira entre la extracción y aquí,
+            // pero es poco probable y el try-catch general lo cubriría si fuera más amplio).
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
-                        null, // No necesitamos credenciales
+                        null,
                         userDetails.getAuthorities()
                 );
                 authToken.setDetails(
@@ -58,6 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
+
         filterChain.doFilter(request, response);
     }
 }
