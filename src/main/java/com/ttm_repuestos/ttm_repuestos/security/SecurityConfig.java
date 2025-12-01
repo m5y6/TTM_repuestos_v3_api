@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity // Habilita la seguridad a nivel de método (para @PreAuthorize)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -51,7 +53,6 @@ public class SecurityConfig {
                         })
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // Definir explícitamente TODAS las rutas públicas
                         .requestMatchers(
                                 new AntPathRequestMatcher("/api/auth/**"),
                                 new AntPathRequestMatcher("/v3/api-docs/**"),
@@ -62,12 +63,10 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/api/productos", HttpMethod.GET.name()),
                                 new AntPathRequestMatcher("/api/productos/**", HttpMethod.GET.name())
                         ).permitAll()
-                        // Todas las demás peticiones deben ser autenticadas
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Configuración para H2 Console
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         return http.build();
