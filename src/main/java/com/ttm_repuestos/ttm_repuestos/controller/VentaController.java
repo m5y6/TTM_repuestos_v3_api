@@ -12,7 +12,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping({"/api/ventas", "/api/ventas/"}) // Volvemos a la solución explícita para asegurar el mapeo
+@RequestMapping({"/ventas", "/ventas/"}) // Acepta la ruta con y sin la barra al final
 @PreAuthorize("hasAnyRole('VENDEDOR', 'ADMIN')")
 public class VentaController {
 

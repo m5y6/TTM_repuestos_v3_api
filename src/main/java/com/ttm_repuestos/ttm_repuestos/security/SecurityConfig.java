@@ -54,14 +54,15 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                new AntPathRequestMatcher("/api/auth/**"),
+                                new AntPathRequestMatcher("/auth/**"),
+                                new AntPathRequestMatcher("/uploads/**"), // <-- REGLA AÑADIDA
                                 new AntPathRequestMatcher("/v3/api-docs/**"),
                                 new AntPathRequestMatcher("/swagger-ui/**"),
                                 new AntPathRequestMatcher("/swagger-ui.html"),
                                 new AntPathRequestMatcher("/images/**"),
                                 new AntPathRequestMatcher("/h2-console/**"),
-                                new AntPathRequestMatcher("/api/productos", HttpMethod.GET.name()),
-                                new AntPathRequestMatcher("/api/productos/**", HttpMethod.GET.name())
+                                new AntPathRequestMatcher("/productos", HttpMethod.GET.name()),
+                                new AntPathRequestMatcher("/productos/**", HttpMethod.GET.name())
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

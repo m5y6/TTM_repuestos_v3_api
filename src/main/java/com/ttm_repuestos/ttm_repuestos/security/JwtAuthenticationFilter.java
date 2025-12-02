@@ -31,6 +31,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+        final String servletPath = request.getServletPath();
+        
+        // Si la petición es para una ruta pública, la dejamos pasar sin validar token.
+        if (servletPath.contains("/auth") || servletPath.contains("/uploads")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

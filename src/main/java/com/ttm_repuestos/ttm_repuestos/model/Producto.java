@@ -27,8 +27,8 @@ public class Producto {
     @Column(nullable = false)
     private String nombre;
 
-    @Column(name = "descripcion", length = 1000) // Mapea al nombre de columna existente
-    private String description; // Corregido para coincidir con el JSON
+    @Column(name = "descripcion", length = 1000)
+    private String description;
 
     @Column(nullable = false)
     private Double precio;
@@ -36,8 +36,8 @@ public class Producto {
     @Column(nullable = false)
     private String categoria;
     
-    @JsonProperty("imagen_url")
     @Column(name = "imagen_url")
+    @JsonProperty("imagen_url") // <-- ESTA ES LA CORRECCIÓN
     private String imagenUrl;
 
     @Column(nullable = false)

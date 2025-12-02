@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/api/carrito")
+@RequestMapping("/carrito")
 public class CarritoController {
 
     @Autowired
