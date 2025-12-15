@@ -14,9 +14,9 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Book API")
+                        .title("TTM Repuestos API")
                         .version("1.0")
-                        .description("API protegida con JWT"))
+                        .description("API para la gestión de la tienda de repuestos TTM. Incluye manejo de productos, usuarios, ventas y carrito de compras."))
                 .components(new Components()
                         .addSecuritySchemes("bearer-key",
                                 new SecurityScheme()
